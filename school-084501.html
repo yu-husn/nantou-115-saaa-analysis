@@ -152,4 +152,38 @@ $('#chart').onkeydown=e=>{if(e.key==='Enter'){let b=e.target.closest('[data-q]')
 $('#close').onclick=()=>$('#detail').close();$('#zoom-close').onclick=()=>$('#zoom').close();
 document.addEventListener('click',e=>{let crop=e.target.closest('[data-question-zoom]');if(crop){$('#zoom-image').hidden=true;let box=$('#zoom-crop');if(!box){box=document.createElement('div');box.id='zoom-crop';$('#zoom').append(box)}box.hidden=false;box.innerHTML=crop.outerHTML;box.firstElementChild.style.maxWidth='none';$('#zoom').showModal();return}let img=e.target.closest('[data-zoom]');if(img){if($('#zoom-crop'))$('#zoom-crop').hidden=true;$('#zoom-image').hidden=false;$('#zoom-image').src=img.dataset.zoom;$('#zoom').showModal()}});
 update();
-</script></body></html>
+</script>
+<script id="school-navigation-script">
+const SCHOOL_DIRECTORY=[{"code": "081312", "name": "私立三育高中附設國中部"}, {"code": "081313j", "name": "私立弘明實驗高中附設國中"}, {"code": "081314", "name": "私立普台中學國中部"}, {"code": "081409", "name": "私立同德高中附設國中部"}, {"code": "081502", "name": "私立均頭國中(小)"}, {"code": "084309", "name": "縣立旭光高中附設國中部"}, {"code": "084501", "name": "縣立南投國中"}, {"code": "084502", "name": "縣立南崗國中"}, {"code": "084503", "name": "縣立中興國中"}, {"code": "084504", "name": "縣立鳳鳴國中"}, {"code": "084505", "name": "縣立埔里國中"}, {"code": "084506", "name": "縣立大成國中"}, {"code": "084507", "name": "縣立宏仁國中"}, {"code": "084508", "name": "縣立草屯國中"}, {"code": "084510", "name": "縣立日新國中"}, {"code": "084511", "name": "縣立竹山國中"}, {"code": "084512", "name": "縣立延和國中"}, {"code": "084513", "name": "縣立社寮國中"}, {"code": "084514", "name": "縣立瑞竹國中"}, {"code": "084515", "name": "縣立集集國中"}, {"code": "084516", "name": "縣立名間國中"}, {"code": "084517", "name": "縣立三光國中"}, {"code": "084518", "name": "縣立鹿谷國中"}, {"code": "084519", "name": "縣立瑞峰國中"}, {"code": "084520", "name": "縣立中寮國中"}, {"code": "084521", "name": "縣立爽文國中"}, {"code": "084522", "name": "縣立魚池國中"}, {"code": "084523", "name": "縣立明潭國中"}, {"code": "084524", "name": "縣立國姓國中"}, {"code": "084525", "name": "縣立北梅國中"}, {"code": "084526", "name": "縣立北山國中"}, {"code": "084527", "name": "縣立水里國中"}, {"code": "084528", "name": "縣立民和國中"}, {"code": "084529", "name": "縣立信義國中"}, {"code": "084530", "name": "縣立同富國中"}, {"code": "084531", "name": "縣立仁愛國中"}, {"code": "084532", "name": "縣立營北國中"}];
+const requestedSchool=new URLSearchParams(location.search).get('school');
+if(!MODE.code && SCHOOL_DIRECTORY.some(r=>r.code===requestedSchool)){
+ school=requestedSchool;grade=7;update();
+}
+const navigation=document.createElement('div');
+navigation.id='school-navigation';
+navigation.innerHTML='<label for="school-navigation-select">選擇學校</label><select id="school-navigation-select" style="display:block;width:100%;max-width:680px;margin:8px 0 12px"></select><p class="hint">選擇學校後，開啟該校的成績、分項能力與逐題分析。本選單連至已公開的全縣分析網頁。</p>';
+document.querySelector('.selection').prepend(navigation);
+const schoolSelect=document.querySelector('#school-navigation-select');
+schoolSelect.innerHTML='<option value="">請選擇學校</option>'+SCHOOL_DIRECTORY.map(r=>'<option value="'+esc(r.code)+'">'+esc(r.name)+'（'+esc(r.code)+'）</option>').join('');
+function syncSchoolNavigation(){
+ schoolSelect.value=school;
+ if(school && DATA.schools[school]){
+  document.querySelector('h1').textContent=DATA.schools[school]+'115年度學力檢測成績分析';
+  document.title=DATA.schools[school]+'115年度學力檢測成績分析';
+ }
+}
+const updateWithoutNavigation=update;
+update=function(){updateWithoutNavigation();syncSchoolNavigation()};
+schoolSelect.onchange=()=>{
+ const code=schoolSelect.value;
+ if(!code)return;
+ if(MODE.code){
+  if(code!==MODE.code)location.href='index.html?school='+encodeURIComponent(code);
+ }else{
+  school=code;grade=7;document.querySelector('#search').value='';update();
+  history.replaceState(null,'','?school='+encodeURIComponent(code));
+ }
+};
+syncSchoolNavigation();
+</script>
+</body></html>
