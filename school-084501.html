@@ -2,6 +2,8 @@
 @media(max-width:1000px){.cards,.metrics{grid-template-columns:repeat(2,1fr)}header,main,footer{padding:26px 20px}h1{font-size:33px}}
 @media(max-width:600px){body{font-size:17px}header,main,footer{padding:22px 13px}h1{font-size:29px}h2{font-size:25px}section:not(.selection){padding:19px 14px}.cards,.metrics{grid-template-columns:1fr 1fr;gap:9px}.card,.metric{padding:13px}.card strong{font-size:27px}.card small{font-size:13px}#school-controls select{min-width:0;width:100%}#school-controls label{width:100%}.toolbar label,.toolbar select{width:100%}.dialog-head{padding:12px}.dialog-head h2{font-size:20px}#detail-body{padding:12px}.hist-row{grid-template-columns:92px 1fr 92px}}
 @media print{header,main{max-width:none;padding:0}body{background:#fff;font-size:12pt}.selection,nav,.toolbar,button,.tabs,#school-comparison{display:none!important}section{break-inside:avoid;border:0!important;padding:10px!important}table{font-size:10pt;white-space:normal}.table-wrap{overflow:visible}details:not([open]){display:none}.cards,.metrics{grid-template-columns:repeat(4,1fr)}dialog[open]{position:static;max-height:none;max-width:none;width:100%;border:0}body:has(dialog[open])>header,body:has(dialog[open])>main,body:has(dialog[open])>footer{display:none}.book-page{break-inside:avoid}}
+
+.teaching-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:16px 0}.teaching-box{padding:18px;border:1px solid #d8e3df;border-radius:9px;background:#f8fbf9}.teaching-box h4{color:#136653;margin:0 0 10px}.teaching-box p{margin:0;white-space:pre-line}@media(max-width:800px){.teaching-grid{grid-template-columns:1fr}}
 </style></head><body>
 <header><div class="eyebrow">縣市學生學習能力檢測 SAAA · 教學診斷報告</div><h1>縣立南投國中115年度學力檢測成績分析</h1><p id="subtitle"></p><div class="meta"><span>115年度 · 2026年6月資料</span><span id="coverage"></span><span>試題與評量架構採官方115年度版本</span></div><nav><a href="#overview">成績概覽</a><a href="#analysis">逐題與向度分析</a><a href="#framework">評量架構</a><a href="#methods">來源與方法</a><button id="print">列印目前畫面</button></nav></header>
 <main><section class="selection"><div id="grades" class="tabs" aria-label="選擇年級"></div><div id="school-controls"><label>搜尋學校名稱或代碼<input id="search" placeholder="例如：南投、084501"></label><label>分析對象<select id="school"></select></label></div><p id="scope"></p></section>
@@ -118,6 +120,12 @@ function resources(d){
  const r=asset(d.key),frame=r.docs.find(x=>x.type==='frame'),book=r.docs.find(x=>x.type==='exam'),err=r.docs.find(x=>x.type==='errata');
  $('#resources').innerHTML=`<h3>${grade}年級${d.subject}</h3><p>官方評量向度：${[...new Set(d.questions.map(q=>q.abilities[0]))].map(esc).join('、')}。</p><div class="resource-links"><a href="${path(book.pdf)}" target="_blank">開啟完整題本PDF</a><a href="${path(frame.pdf)}" target="_blank">開啟評量架構PDF</a>${err?`<a href="${path(err.pdf)}" target="_blank">試題疑義與官方決議</a>`:''}</div>${r.audio?`<h3>官方英語聽力音檔</h3><audio controls preload="none" src="${path(r.audio)}"></audio>`:''}<details><summary>直接瀏覽官方評量架構（${frame.pages.length}頁）</summary>${pages(frame)}</details>${err?`<details><summary>試題疑義與官方決議</summary>${pages(err)}</details>`:''}`;
 }
+
+function teachingReview(fact,focus,action){
+ const cause=`作答結果可作為檢視「${focus||'本題對應能力'}」的線索；需搭配學生口述、解題步驟與課堂觀察，不能只憑統計判定錯誤原因。`;
+ return `<section class="teaching-review"><h3>教學檢視</h3><div class="teaching-grid"><div class="teaching-box"><h4>數據事實</h4><p>${esc(fact)}</p></div><div class="teaching-box"><h4>待驗證的可能原因</h4><p>${esc(cause)}</p></div><div class="teaching-box"><h4>教學行動建議</h4><p>${esc(action||'請學生口述解題依據，對照正答與主要錯選，標出題目或題組中的證據；以同評量目標短題再次檢查理解。')}</p></div></div></section>`;
+}
+
 function showQuestion(qn){
  const d=active(),q=d.questions[qn-1],s=target(d),r=asset(d.key),book=r.docs.find(x=>x.type==='exam'),page=book.questionPages[String(qn)]||1;
  current=qn;$('#detail-title').textContent=`${grade}年級${d.subject} 第${qn}題｜${name()}`;
@@ -128,6 +136,8 @@ function showQuestion(qn){
  if(r.audio&&qn<=15)body+=`<h3>官方聽力音檔</h3><audio controls preload="none" src="${path(r.audio)}"></audio><p class="hint">完整音檔可拖曳進度；不推測未提供的逐題時間點。</p>`;
  body+=(book.questionRegions[String(qn)]||[]).map(region=>questionImage(book,region)).join('');
  body+=`<h3>各選項作答情形</h3><p><strong>官方正答：${esc(q.answer)}</strong> · ${q.abilities.map(esc).join('／')}</p>${d.key==='ch7'&&qn===2?'<p class="notice">官方0617更新：B、D皆計分，兩者都不是錯誤選項。</p>':''}<p>有效紀錄：${esc(name())} ${s?.n??0}人；南投縣 ${d.county.n}人。其他反應符號照來源保留。</p><div class="table-wrap"><table><thead><tr><th rowspan="2" scope="col">選項／反應</th><th colspan="2" scope="colgroup">${esc(name())}</th><th colspan="2" scope="colgroup">南投縣</th></tr><tr><th scope="col">人數</th><th scope="col">百分比</th><th scope="col">人數</th><th scope="col">百分比</th></tr></thead><tbody>${[...opts,'未作答',...extra].map(o=>`<tr><th scope="row">${esc(o)}${accepted.includes(o)?'（正答）':opts.includes(o)||o==='未作答'?'':'（來源符號）'}</th>${cell(s,o)}${cell(d.county,o)}</tr>`).join('')}<tr><th scope="row">答對率（二元反應）</th><td>—</td><td>${pct(qrate(s,qn))}</td><td>—</td><td>${pct(qrate(d.county,qn))}</td></tr></tbody></table></div><div class="toolbar"><button id="prev-q"${qn===1?' disabled':''}>上一題</button><button id="next-q"${qn===d.questionCount?' disabled':''}>下一題</button></div>`;
+ const wrong=bestWrong(q,s);
+ body+=teachingReview(s?.suppressed?'有效紀錄不足5人，學校成績不呈現。':`${name()}答對率${pct(qrate(s,qn))}；南投縣${pct(qrate(d.county,qn))}；最高錯選：${wrong.text}。`,q.abilities.join('／'),d.subject==='數學'?'請學生呈現解題步驟，檢查題意理解、運算與推理；再以同能力短題確認。':d.subject==='英語文'&&r.audio&&qn<=15?'對照本題音檔片段與選項，請學生說明聽到的關鍵訊息；以相近情境再檢核理解。':null);
  body+=`<details><summary>查看本年級評量架構</summary>${pages(r.docs.find(x=>x.type==='frame'))}</details>`;
  $('#detail-body').innerHTML=body;$('#prev-q').onclick=()=>showQuestion(qn-1);$('#next-q').onclick=()=>showQuestion(qn+1);
  if(!$('#detail').open)$('#detail').showModal();$('#detail').scrollTop=0;
