@@ -8,10 +8,10 @@
 <section id="overview"><div class="section-label">01 / OVERVIEW</div><h2 id="overview-title">各科成績概覽</h2><p class="hint">來源平均照原檔呈現；「全部參與縣市」不等同全國所有學生。不同年級、科目的測驗內容不同，不直接解讀為進退步。</p><div id="cards" class="cards"></div><div id="school-comparison"></div></section>
 <section id="analysis"><div class="section-label">02 / SUBJECT ANALYSIS</div><h2>各科逐題與分項能力分析</h2><div id="subjects" class="tabs" aria-label="選擇科目"></div><h3 id="subject-title"></h3><div id="metrics" class="metrics"></div><div id="findings" class="findings"></div>
 <details id="distribution"><summary>整體答對率分布（自訂區間，非官方等級）</summary><p>以有總平均紀錄者的二元反應重算，按10%區間分組；未套用會考精熟、基礎、待加強分級。</p><div id="histogram"></div></details>
-<h3>分項能力比較</h3><p class="hint">下表採來源平均表的向度數值。逐題分類則依官方評量架構；數學同時呈現內容與認知向度。</p><div class="table-wrap"><table><thead><tr><th>評量向度</th><th>題號</th><th id="dimension-main">目前對象</th><th>南投縣</th><th>全部參與縣市</th><th>對象減縣</th><th>對象減整體</th></tr></thead><tbody id="dimensions"></tbody></table></div>
+<h3>分項能力比較</h3><p class="hint">下表採來源平均表的向度數值。逐題分類則依官方評量架構；數學同時呈現內容與認知向度。</p><div class="table-wrap"><table><thead><tr><th>評量向度</th><th>題號</th><th id="dimension-main">目前對象</th><th>南投縣</th><th>全部參與縣市</th><th>學校減縣</th><th>學校減全體</th></tr></thead><tbody id="dimensions"></tbody></table></div>
 <h3>逐題答對率折線圖</h3><p class="hint">綠線：目前對象；藍線：南投縣。縱軸統一0–100%。點選題號可查看作答；此處使用CSV重算值。</p><div id="chart" class="chart"></div>
 <div class="toolbar"><label>逐題排序<select id="sort"><option value="number">1. 按照題號少至多</option><option value="gap">2. 學校減南投縣：弱題在前</option><option value="ability">3. 先分項能力，再按學校減南投縣</option><option value="wrong">4. 最高錯選比例由高至低</option><option value="rate">5. 答對率由低至高</option></select></label><label>篩選分項能力<select id="ability"></select></label><button id="csv">下載目前逐題表CSV</button></div>
-<p id="qnote" class="hint"></p><div class="table-wrap"><table><thead><tr><th>題號</th><th>分項能力</th><th>官方正答</th><th id="q-main">目前對象</th><th>南投縣</th><th>對象減縣</th><th>最高錯選</th><th>未作答</th><th>查看</th></tr></thead><tbody id="questions"></tbody><tfoot id="average"></tfoot></table></div>
+<p id="qnote" class="hint"></p><div class="table-wrap"><table><thead><tr><th>題號</th><th>分項能力</th><th>官方正答</th><th id="q-main">目前對象</th><th>南投縣</th><th>學校減縣</th><th>最高錯選</th><th>未作答</th><th>查看</th></tr></thead><tbody id="questions"></tbody><tfoot id="average"></tfoot></table></div>
 <details id="class-section"><summary>校內班級概覽</summary><p>班級僅作校內教學診斷；來源班平均與CSV重算分開列示，不作班級名次。有效紀錄不足5人的班級不呈現成績。</p><div class="table-wrap"><table><thead><tr><th>班級</th><th>有總平均紀錄</th><th>無總平均紀錄</th><th>來源班平均</th><th>CSV重算平均</th><th>重算班減校</th></tr></thead><tbody id="classes"></tbody></table></div></details>
 </section>
 <section id="framework"><div class="section-label">03 / ASSESSMENT FRAMEWORK</div><h2>官方評量架構與試題教材</h2><p>依目前科目、年級切換。保留官方頁面的說明、題號分布與完整題本；圖片可點擊放大。</p><div id="resources"></div></section>
@@ -133,7 +133,7 @@ function showQuestion(qn){
  if(!$('#detail').open)$('#detail').showModal();$('#detail').scrollTop=0;
 }
 function exportCSV(){
- const d=active(),s=target(d),rows=[['年度','年級','科目','學校代碼','分析對象','題號','分項能力','官方正答','答對率(%)','南投縣(%)','對象減縣(百分點)','最高錯選']];
+ const d=active(),s=target(d),rows=[['年度','年級','科目','學校代碼','分析對象','題號','分項能力','官方正答','答對率(%)','南投縣(%)','學校減縣(百分點)','最高錯選']];
  shownQuestions.forEach(q=>rows.push([115,grade,d.subject,school,name(),q.q,q.abilities.join('/'),q.answer,qrate(s,q.q)==null?'':qrate(s,q.q)*100,qrate(d.county,q.q)*100,diff(qrate(s,q.q),qrate(d.county,q.q))==null?'':diff(qrate(s,q.q),qrate(d.county,q.q))*100,bestWrong(q,s).text]));
  const content='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n'),url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`115_${name()}_${grade}年級_${subject}_逐題分析.csv`;a.click();URL.revokeObjectURL(url);
 }
